@@ -3,16 +3,26 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "dev": "concurrently \"bun run --hot ./src/server.ts\" \"bun run dev:vite\"",
+    "dev:vite": "vite",
+    "build": "vite build",
+    "serve": "NODE_ENV=production bun --hot run ./src/server.ts",
     "build:css": "npx tailwindcss -i ./src/assets/styles.css -o ./dist/css/styles.css --watch"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "concurrently": "^8.2.2",
+    "vite": "^5.3.3",
+    "preact-render-to-string": "^6.5.5",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "tailwindcss": "^3.4.5"
   },
   "peerDependencies": {
     "typescript": "^5.5.3"
   },
   "dependencies": {
     "htmx.org": "^2.0.1",
-    "preact-render-to-string": "^6.5.5"
+    "lit": "^3.1.4"
   }
 }

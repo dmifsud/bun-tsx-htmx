@@ -16,6 +16,8 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
+    "experimentalDecorators": true,         // Enable experimental decorators
+    "emitDecoratorMetadata": true,           // Enable metadata reflection API
     "types": [
       "bun-types" // add Bun global
     ]
