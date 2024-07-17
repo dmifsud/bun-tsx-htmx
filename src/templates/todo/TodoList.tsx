@@ -20,7 +20,7 @@ export function TodoList() {
             </div>
             <div class="md:w-1/2 mx-auto">
                 <div class="bg-white shadow-md rounded-lg p-6">
-                    <form hx-post="/add" hx-target="#todo-list" hx-swap="beforeend" hx-on--after-request="this.reset()">
+                    <form hx-post="/todo" hx-target="#todo-list" hx-swap="afterbegin" hx-on--after-request="this.reset()">
                         <div class="flex mb-4">
                         <input type="text" autocomplete="off" name="task" placeholder="New Todo" class="w-full px-4 py-2 mr-2 rounded-lg
                                                 border-gray-300 focus:outline-none
@@ -30,7 +30,7 @@ export function TodoList() {
                         </div>
                     </form>
                     <ul id="todo-list">
-                        {todos.map(todo => <TodoItem todo={todo} />)}
+                        {todos.reverse().map(todo => <TodoItem todo={todo} />)}
                     </ul>
                 </div>
             </div>
