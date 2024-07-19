@@ -25,5 +25,5 @@ interface ActivitiesModalStore {
   };
   
   export default () => {
-    return AuthBase(ActivitiesPage());
+    return AuthBase(ActivitiesPage(), "/activities");
   };

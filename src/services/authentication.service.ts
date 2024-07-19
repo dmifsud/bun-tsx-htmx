@@ -44,7 +44,7 @@ export class AuthenticationService {
     public fakeToken: string | undefined;
     private fakeAuthenticatedUserId: number | undefined;
 
-    async login(email: string, _password: string) {
+    async login(email: string, _password: string, _remember: boolean) {
 
         const user = fakeUsersDb.find(u => u.email === email);
         
@@ -52,6 +52,7 @@ export class AuthenticationService {
             if (user) {
                 this.fakeAuthenticatedUserId = user.id;
                 this.fakeToken = Date.now().toString();
+
                 resolve(user);
             } else {
                 reject('User not found');
@@ -65,9 +66,22 @@ export class AuthenticationService {
         return new Promise<void>((resolve) => resolve());
     }
 
-    async isAuthenticated(userId: number, token: string): Promise<boolean> {
+    async isAuthenticated(userId: number, token: string, rememberMe: boolean): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
+            // NOTE: once again for the sake of the demo this is done all in server memory with dodgy logic
+            if (rememberMe) {
+                this.fakeAuthenticatedUserId = userId;
+                this.fakeToken = token;
+            }
             resolve(userId === this.fakeAuthenticatedUserId && token === this.fakeToken);
         });
     }
+
+    getLoggedInUser() {
+        return fakeUsersDb.find(u => u.id === this.fakeAuthenticatedUserId);
+    }
 }
+
+// NOTE: for the sake of a demo this is a simple in-memory store state
+const authService = new AuthenticationService();
+export default authService;

@@ -16,14 +16,14 @@ import { renderBase } from './templates/base';
 import { Todo } from './models/todo.model';
 import Login from './templates/login/Login.page';
 import ActivitiesPage from './templates/activities/Activities.page';
-import { AuthenticationService } from './services/authentication.service';
+import authService, { AuthenticationService } from './services/authentication.service';
 import CourseActivities from './templates/activities/CourseActivities';
 import { courseData } from './mock_api/course-data.mock.api';
 import ActivityModal from './templates/activities/ActivityModal';
+import AuthBase from './templates/authBase';
 
 const app = new Hono();
-// NOTE: for the sake of a demo this is a simple in-memory store state
-const authService = new AuthenticationService();
+
 
 const timeout = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -32,9 +32,9 @@ const timeout = (ms: number) => {
 const authMiddleware: MiddlewareHandler = async (c, next) => {
     const token = getCookie(c, 'token');
     const userId = getCookie(c, 'userId');
-
+    const rememberMe = getCookie(c, 'rememberMe');
     if (token && userId) {
-        const isAuthenticated = await authService.isAuthenticated(Number(userId), token);
+        const isAuthenticated = await authService.isAuthenticated(Number(userId), token, rememberMe === 'true');
         if (isAuthenticated) {
             await next();
         } else {
@@ -61,11 +61,13 @@ app.get('/login', (c) => {
 });
 
 app.post('/login', async (c) => {
-    const { email, password } = await c.req.parseBody();
+    const { email, password, remember } = await c.req.parseBody();
     try {
-        const user = await authService.login(email as string, password as string);
+        const rememberMe = (remember as string) === 'on';
+        const user = await authService.login(email as string, password as string, rememberMe);
         c.res.headers.append('Set-Cookie', `token=${authService.fakeToken}; HttpOnly; Path=/`);
         c.res.headers.append('Set-Cookie', `userId=${user.id}; HttpOnly; Path=/`);
+        c.res.headers.append('Set-Cookie', `rememberMe=${rememberMe}; HttpOnly; Path=/`);
         await timeout(500);
         return c.html(`<meta http-equiv="refresh" content="0;URL='/'">`);
     } catch (err) {
@@ -99,7 +101,7 @@ app.get('/activities/courses/:id', authMiddleware, (c) => {
 });
 
 app.get('/todo', (c) => {
-    return c.html(renderBase(TodoList(), 'Todo List'));
+    return c.html(renderBase(AuthBase(TodoList(), "/todo"), 'Todo List'));
 });
 // Handler for the /todo/:id route
 app.get('/todo/:id', (c) => {
