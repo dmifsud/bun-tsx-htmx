@@ -1,4 +1,11 @@
-import { Hono } from 'hono';
+import { Hono, MiddlewareHandler } from 'hono';
+import {
+    getCookie,
+    getSignedCookie,
+    setCookie,
+    setSignedCookie,
+    deleteCookie,
+  } from 'hono/cookie'
 import { serveStatic } from 'hono/bun';
 import { TodoList, todos } from './templates/todo/TodoList';
 import { render } from 'preact-render-to-string';
@@ -7,18 +14,93 @@ import { TodoItem } from './templates/todo/TodoItem';
 import { Serve } from 'bun';
 import { renderBase } from './templates/base';
 import { Todo } from './models/todo.model';
+import Login from './templates/login/Login.page';
+import ActivitiesPage from './templates/activities/Activities.page';
+import { AuthenticationService } from './services/authentication.service';
+import CourseActivities from './templates/activities/CourseActivities';
+import { courseData } from './mock_api/course-data.mock.api';
+import ActivityModal from './templates/activities/ActivityModal';
 
 const app = new Hono();
+// NOTE: for the sake of a demo this is a simple in-memory store state
+const authService = new AuthenticationService();
+
+const timeout = (ms: number) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const authMiddleware: MiddlewareHandler = async (c, next) => {
+    const token = getCookie(c, 'token');
+    const userId = getCookie(c, 'userId');
+
+    if (token && userId) {
+        const isAuthenticated = await authService.isAuthenticated(Number(userId), token);
+        if (isAuthenticated) {
+            await next();
+        } else {
+            return c.redirect('/login');
+        }
+    } else {
+        return c.redirect('/login');
+    }
+};
 
 app.use("/dist/*", serveStatic({ root: "./" }));
 
 // Function to find a todo by ID
 const findTodoById = (id: number) => todos.find(todo => todo.id === id);
 
-app.get('/', (c) => {
-    return c.html(renderBase(TodoList()));
+app.get('/', authMiddleware, (c) => {
+    // TODO: create an actual home page
+    // return c.html(`<div>Home</div>`);
+    return c.redirect('/activities');
 });
 
+app.get('/login', (c) => {
+    return c.html(renderBase(Login(), 'Login'));
+});
+
+app.post('/login', async (c) => {
+    const { email, password } = await c.req.parseBody();
+    try {
+        const user = await authService.login(email as string, password as string);
+        c.res.headers.append('Set-Cookie', `token=${authService.fakeToken}; HttpOnly; Path=/`);
+        c.res.headers.append('Set-Cookie', `userId=${user.id}; HttpOnly; Path=/`);
+        await timeout(500);
+        return c.html(`<meta http-equiv="refresh" content="0;URL='/'">`);
+    } catch (err) {
+        return c.html(`<p>${err}</p>`);
+    }
+});
+
+app.post('/signout', async (c) => {
+    deleteCookie(c, 'token');
+    deleteCookie(c, 'userId');
+    await timeout(400);
+    return c.html(`<meta http-equiv="refresh" content="0;URL='/'">`);
+});
+
+app.get('/activities', authMiddleware, (c) => {
+    return c.html(renderBase(ActivitiesPage(), 'Activities'));
+});
+
+app.get('/activities/courses', authMiddleware, (c) => {
+    return c.html(render(CourseActivities({ title: 'Courses', courseData })));
+});
+
+app.get('/activities/courses/:id', authMiddleware, (c) => {
+    const id = +c.req.param('id');
+    const activity = courseData.activities.find(activity => activity.id === id);
+    if (activity) {
+        return c.html(render(ActivityModal({ activity })));
+    } else {
+        return c.text('Not found', 404);
+    }
+});
+
+app.get('/todo', (c) => {
+    return c.html(renderBase(TodoList(), 'Todo List'));
+});
 // Handler for the /todo/:id route
 app.get('/todo/:id', (c) => {
   const id = +c.req.param('id');
@@ -73,7 +155,8 @@ app.post('/todo', async (c) => {
     const todoIndex = todos.findIndex(todo => todo.id === id);
     if (todoIndex !== -1) {
       todos.splice(todoIndex, 1);
-      return c.text('', 204); // No content response
+      // empty response
+      return new Response();
     } else {
       return c.text('Not found', 404);
     }

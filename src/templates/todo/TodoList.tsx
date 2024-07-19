@@ -14,8 +14,8 @@ export function TodoList() {
 
     return (
         <div class="container mx-auto my-10">
-            <h1 class="text-center text-3xl font-semibold mb-4">Todo List</h1>
-            <div class="text-center">
+            <h1 class="text-center text-3xl font-semibold mb-4 dark:text-white">Todo List</h1>
+            <div class="text-center dark:text-white">
                 <small>HTMx, TailwindCSS, Bun (server) &amp; Preact (SSR)</small>
             </div>
             <div class="md:w-1/2 mx-auto">
@@ -30,7 +30,7 @@ export function TodoList() {
                         </div>
                     </form>
                     <ul id="todo-list">
-                        {todos.reverse().map(todo => <TodoItem todo={todo} />)}
+                        {todos.sort((a, b) => b.id - a.id).map(todo => <TodoItem todo={todo} />)}
                     </ul>
                 </div>
             </div>

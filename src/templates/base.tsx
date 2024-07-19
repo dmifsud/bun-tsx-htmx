@@ -20,16 +20,16 @@ function frontendLib() {
 }
 
 
-export function renderBase(page: h.JSX.Element) {
+export function renderBase(page: h.JSX.Element, title: string = 'Bun Project') {
     return `
         <!DOCTYPE html>
         <html>
             <head>
-                <title>Bun Project</title>
+                <title>${title}</title>
                 ${render(frontendLib())}
             </head>
-            <body>
-            ${render(page)}
+            <body class="bg-gray-50 dark:bg-gray-900">
+                ${render(page)}
             </body>
         </html>
         `;
