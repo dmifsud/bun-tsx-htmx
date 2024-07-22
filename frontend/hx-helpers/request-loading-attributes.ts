@@ -1,9 +1,8 @@
 // NOTE: this is just an idea. A WIP. Still need to test its usability
-const syncEvents = () => {
-    document.querySelectorAll('[hc-req\\:disabled]').forEach((el: Element) => {
-        if ((el as HTMLElement).dataset.hcReqListenersAdded === 'true') {
-            return;
-        }
+const syncEvents = (content: HTMLElement) => {
+    // TODO: find a way to combine these
+
+    content.querySelectorAll('[hc-req\\:disabled]').forEach((el: Element) => {
         const form = el.closest('form');
         if (form) {
             form.addEventListener('htmx:beforeRequest', function(event) {
@@ -17,10 +16,7 @@ const syncEvents = () => {
         }
     });
 
-    document.querySelectorAll('[hc-req\\:class]').forEach((el: Element) => {
-        if ((el as HTMLElement).dataset.hcReqClassListenersAdded === 'true') {
-            return;
-        }
+    content.querySelectorAll('[hc-req\\:class]').forEach((el: Element) => {
         const form = el.closest('form');
         if (form) {
             form.addEventListener('htmx:beforeRequest', function(event) {
@@ -35,7 +31,6 @@ const syncEvents = () => {
                     className.split(' ').forEach(c => el.classList.remove(c));
                 }
             });
-            (el as HTMLElement).dataset.hcReqClassListenersAdded = 'true';
         }
     });
 };

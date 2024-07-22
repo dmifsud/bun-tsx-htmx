@@ -1,12 +1,7 @@
 // NOTE: hc- stands for hyper custom
-const syncEvents = () => {
+const syncEvents = (content: HTMLElement) => {
 
-        document.querySelectorAll('input[hc-invalid-target]').forEach((input) => {
-
-            if ((input as HTMLElement).dataset.invalidTargetListener === 'true') {
-                return;
-            }
-
+        content.querySelectorAll('input[hc-invalid-target]').forEach((input) => {
 
             const syncUIValidity = function(this: HTMLInputElement, event: Event) {
                 if (event instanceof KeyboardEvent) {
@@ -15,7 +10,7 @@ const syncEvents = () => {
                     }
                 }
                 const target = this.getAttribute('hc-invalid-target') ?? '';
-                const targetElement = document.querySelector(target);
+                const targetElement = content.querySelector(target);
                 if (targetElement) {
                     if (this.validity.valid) {
                         targetElement.innerHTML = '';
@@ -35,16 +30,10 @@ const syncEvents = () => {
             additionalEvents.forEach(event => {
                 input.addEventListener(event, syncUIValidity);
             });
-
-            (input as HTMLElement).dataset.invalidTargetListener = 'true';
     
         });
     
-        document.querySelectorAll('input[hc-invalid-class]').forEach(input => {
-            if ((input as HTMLElement).dataset.invalidClassListener === 'true') {
-                return;
-            }
-
+        content.querySelectorAll('input[hc-invalid-class]').forEach(input => {
 
             const syncUIValidity = function(this: HTMLInputElement, event: Event) {
                 if (event instanceof KeyboardEvent) {
@@ -71,8 +60,6 @@ const syncEvents = () => {
             additionalEvents.forEach(event => {
                 input.addEventListener(event, syncUIValidity);
             });
-
-            (input as HTMLElement).dataset.invalidClassListener = 'true';
         });
         
     };

@@ -1,11 +1,12 @@
-const syncEvents = () => {
+const syncEvents = (content: HTMLElement) => {
 
-    document.querySelectorAll('[hc-request-loading-show]').forEach((el: Element) => {
+    content.querySelectorAll('[hc-request-loading-show]').forEach((el: Element) => {
         if ((el as HTMLElement).dataset.listenersAdded === 'true') {
+            console.log('already added');
             return;
         }
         const formSelector = el.getAttribute('hc-request-loading-show');
-        const form = document.querySelector(formSelector ?? '');
+        const form = content.querySelector(formSelector ?? '');
         if (form) {
             form.addEventListener('htmx:beforeRequest', function(event) {
                 (el as HTMLElement).style.display = 'inline';
@@ -21,12 +22,13 @@ const syncEvents = () => {
         }
     });
 
-    document.querySelectorAll('[hc-request-loading-hide]').forEach((el: Element) => {
+    content.querySelectorAll('[hc-request-loading-hide]').forEach((el: Element) => {
         if ((el as HTMLElement).dataset.listenersAdded === 'true') {
+            console.log('already added');
             return;
         }
         const formSelector = el.getAttribute('hc-request-loading-hide');
-        const form = document.querySelector(formSelector ?? '');
+        const form = content.querySelector(formSelector ?? '');
         if (form) {
             form.addEventListener('htmx:beforeRequest', function(event) {
                 (el as HTMLElement).style.display = 'none';
