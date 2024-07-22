@@ -100,7 +100,7 @@ app.get('/activities/courses/:id', authMiddleware, (c) => {
     }
 });
 
-app.get('/todo', (c) => {
+app.get('/todo', authMiddleware, (c) => {
     return c.html(renderBase(AuthBase(TodoList(), "/todo"), 'Todo List'));
 });
 // Handler for the /todo/:id route

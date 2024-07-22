@@ -11,13 +11,20 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
     
     return (
         <li class="[&:not(:last-child)]:border-b border-gray-200 hover:bg-slate-50">
-            <form id={`item-${todo.id}`} hx-patch={`/todos/${todo.id}`} hx-target="closest li" hx-swap="outerHTML" class="flex items-center justify-between py-4 gap-4">
+            <form id={`item-${todo.id}`} 
+                hx-patch={`/todos/${todo.id}`}
+                hx-target="closest li"
+                hx-swap="outerHTML" 
+                hc-req:class="animate-loadingAnimation"
+                class="flex items-center justify-between py-4 gap-4">
                 <label class="flex items-center w-[70%] cursor-pointer">
                     {
                         edit ?
                             <input type="text" autocomplete="off" class="w-full px-4 py-2 mr-2 rounded-lg
                                             border-gray-300 focus:outline-none
-                                            focus:border-blue-500" value={todo.task} name="task"/> :
+                                            focus:border-blue-500" 
+                                            required hc-invalid-target={`#update-error-${todo.id}`} hc-invalid-class="border-red-500 text-red-600" hc-invalid-events="blur keyup"
+                                            value={todo.task} name="task"/> :
                             <span>
                                 <input type="checkbox" name="done" hx-patch={`/todos/${todo.id}`} hx-trigger="change" checked={todo.done} class="mr-2"/>
                                 <span class={classes.taskText}>{todo.task}</span>
@@ -29,7 +36,7 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
                     {
                         edit ?
                             <span>
-                                <button hx-get={`/todo/${todo.id}`} hx-target="closest li" hx-swap="outerHTML" type="button" class="bg-white hover:bg-gray-50 text-black font-bold py-2 px-4 rounded border border-gray-200">Cancel</button>
+                                <button hx-get={`/todo/${todo.id}`} hx-target="closest li" hx-swap="outerHTML" type="button" class="bg-white hover:bg-gray-50 text-black font-bold py-2 px-4 rounded border border-gray-200 mr-4">&times;</button>
                                 <button type="submit" class="bg-green-500 hover:bg-green-700 
                                             text-white font-bold py-2 px-4 rounded">
                                         <span hc-request-loading-hide={`#item-${todo.id}`}>Update</span>
@@ -46,6 +53,7 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
                     }
                 </div>
             </form>
+            <p id={`update-error-${todo.id}`} className='text-red-600 text-sm'></p>
         </li>
     );
 }
