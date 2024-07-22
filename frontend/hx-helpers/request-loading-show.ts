@@ -1,5 +1,5 @@
 if (document) {
-    document.addEventListener("DOMContentLoaded", () => {
+    const syncEvents = () => {
 
         document.querySelectorAll('[hc-request-loading-show]').forEach((el: Element) => {
             const formSelector = el.getAttribute('hc-request-loading-show');
@@ -33,6 +33,9 @@ if (document) {
             }
         });
 
-    }, false);
+    };
+    // TODO: this needs to be updated so that when there's any htmx:afterReqest, this code (function) is added again
+    document.addEventListener("DOMContentLoaded", syncEvents, false);
+    document.addEventListener("htmx:afterRequest", syncEvents); // TODO: gotta make sure no duplicate events are set
     
 }

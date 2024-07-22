@@ -145,6 +145,7 @@ app.post('/todo', async (c) => {
       const data = await c.req.parseBody();
       todoToUpdate.task = data.task?.toString() ?? todoToUpdate.task;
       todoToUpdate.done = data.done === 'on';
+      await timeout(500);
       return c.html(render(TodoItem({ todo: todoToUpdate })));
     } else {
       return c.text('Not found', 404);

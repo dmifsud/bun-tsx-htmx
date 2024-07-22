@@ -11,7 +11,7 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
     
     return (
         <li class="[&:not(:last-child)]:border-b border-gray-200 hover:bg-slate-50">
-            <form hx-patch={`/todos/${todo.id}`} hx-target="closest li" hx-swap="outerHTML" class="flex items-center justify-between py-4 gap-4">
+            <form id={`item-${todo.id}`} hx-patch={`/todos/${todo.id}`} hx-target="closest li" hx-swap="outerHTML" class="flex items-center justify-between py-4 gap-4">
                 <label class="flex items-center w-[70%] cursor-pointer">
                     {
                         edit ?
@@ -31,7 +31,10 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
                             <span>
                                 <button hx-get={`/todo/${todo.id}`} hx-target="closest li" hx-swap="outerHTML" type="button" class="bg-white hover:bg-gray-50 text-black font-bold py-2 px-4 rounded border border-gray-200">Cancel</button>
                                 <button type="submit" class="bg-green-500 hover:bg-green-700 
-                                            text-white font-bold py-2 px-4 rounded">Update</button>
+                                            text-white font-bold py-2 px-4 rounded">
+                                        <span hc-request-loading-hide={`#item-${todo.id}`}>Update</span>
+                                        <span hc-request-loading-show={`#item-${todo.id}`}>Updating&hellip;</span>
+                                </button>
                             </span> :
                             <span>
                                 <button type="button" hx-delete={`/todo/${todo.id}`} hx-confirm="Are you sure you want to delete?" hx-target="closest li" hx-swap="outerHTML" 
