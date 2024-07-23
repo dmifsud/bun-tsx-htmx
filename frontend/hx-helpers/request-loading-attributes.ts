@@ -2,22 +2,27 @@
 const syncEvents = (content: HTMLElement) => {
     // TODO: find a way to combine these
 
-    content.querySelectorAll('[hc-req\\:disabled]').forEach((el: Element) => {
-        const form = el.closest('form');
-        if (form) {
-            form.addEventListener('htmx:beforeRequest', function(event) {
-                console.log('beforeRequest');
-                (el as HTMLElement).setAttribute('disabled', 'disabled');
-            });
-            form.addEventListener('htmx:afterRequest', function(event) {
-                (el as HTMLElement).removeAttribute('disabled');
-            });
-            (el as HTMLElement).dataset.hcReqListenersAdded = 'true';
-        }
+    content.querySelectorAll('*:not([hc-req\\:class]').forEach((el: Element) => {
+        const reqAttributes = Array.from(el.attributes).filter(attr => attr.name.startsWith('hc-req:'));
+        const customRef = el.getAttribute('hc-req-ref');
+        reqAttributes.forEach(attr => {
+            const attrName = attr.name.replace('hc-req:', '');
+            const attrValue = el.getAttribute(attrName);
+            const form = customRef ? content.querySelector(customRef) : el.closest('form');
+            if (form) {
+                form.addEventListener('htmx:beforeRequest', function(event) {
+                    (el as HTMLElement).setAttribute(attrName, attrValue ?? attrName);
+                });
+                form.addEventListener('htmx:afterRequest', function(event) {
+                    (el as HTMLElement).removeAttribute(attrName);
+                });
+            }
+        });
     });
 
     content.querySelectorAll('[hc-req\\:class]').forEach((el: Element) => {
-        const form = el.closest('form');
+        const customRef = el.getAttribute('hc-req-ref');
+        const form = customRef ? content.querySelector(customRef) : el.closest('form');
         if (form) {
             form.addEventListener('htmx:beforeRequest', function(event) {
                 const className = el.getAttribute('hc-req:class');

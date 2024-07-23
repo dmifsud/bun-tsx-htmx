@@ -17,7 +17,7 @@ interface ActivitiesModalStore {
     return (
       <div class="flex justify-center">
         {/* <ActivityModal /> */}
-        <div class="w-[50%] p-10" hx-get="/activities/courses" hx-trigger="load">
+        <div class="w-[75%] p-10" hx-get="/activities/courses" hx-trigger="load">
           <span class="dark:white-text">Loading...</span>
         </div>
       </div>

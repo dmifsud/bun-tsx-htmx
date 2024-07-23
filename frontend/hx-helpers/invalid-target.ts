@@ -1,11 +1,13 @@
 // NOTE: hc- stands for hyper custom
+const keysNotToSync = ['Enter', 'Tab', 'Shift', 'Control', 'Alt', 'Meta', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+
 const syncEvents = (content: HTMLElement) => {
 
         content.querySelectorAll('input[hc-invalid-target]').forEach((input) => {
 
             const syncUIValidity = function(this: HTMLInputElement, event: Event) {
                 if (event instanceof KeyboardEvent) {
-                    if (event.key === 'Enter') {
+                    if (keysNotToSync.includes(event.key)) {
                         return;
                     }
                 }
@@ -37,7 +39,7 @@ const syncEvents = (content: HTMLElement) => {
 
             const syncUIValidity = function(this: HTMLInputElement, event: Event) {
                 if (event instanceof KeyboardEvent) {
-                    if (event.key === 'Enter') {
+                    if (keysNotToSync.includes(event.key)) {
                         return;
                     }
                 }

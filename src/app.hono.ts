@@ -21,6 +21,7 @@ import CourseActivities from './templates/activities/CourseActivities';
 import { courseData } from './mock_api/course-data.mock.api';
 import ActivityModal from './templates/activities/ActivityModal';
 import AuthBase from './templates/authBase';
+import { CourseActivityItems } from './templates/activities/CourseActivityItem';
 
 const app = new Hono();
 
@@ -98,6 +99,14 @@ app.get('/activities/courses/:id', authMiddleware, (c) => {
     } else {
         return c.text('Not found', 404);
     }
+});
+
+app.post('/activities/courses/search', authMiddleware, async (c) => {
+    const data = await c.req.parseBody();
+    const search = data.search?.toString() || '';
+    const filteredActivities = courseData.activities.filter(activity => activity.name.toLowerCase().includes(search.toLowerCase()));
+    await timeout(1000);
+    return c.html(render(CourseActivityItems({ activities: filteredActivities })));
 });
 
 app.get('/todo', authMiddleware, (c) => {

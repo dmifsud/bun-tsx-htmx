@@ -20,7 +20,7 @@ const AuthBase = (children: h.JSX.Element, activeLink: string) => {
             <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <h1 className="text-2xl font-semibold whitespace-nowrap dark:text-white"><span class="rounded-full bg-blue-700 p-2 text-white" title={`${user.name} ${user.surname}`}>{user.name[0]+user.surname[0]}</span> {user.name} {user.surname}</h1>
             <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-            <button id="signout-button" type="button" hx-post="/signout" class="disabled:opacity-15 bg-blue-700 w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+            <button id="signout-button" type="button" hx-post="/signout" hc-req-ref="#signout-button" hc-req:disabled class="disabled:opacity-10 bg-blue-700 w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                 <span hc-request-loading-hide="#signout-button">Sign Out</span>
                 <span hc-request-loading-show="#signout-button">Loading...</span>
             </button>

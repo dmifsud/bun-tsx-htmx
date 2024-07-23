@@ -18,7 +18,7 @@ export function TodoList() {
             <div class="text-center dark:text-white">
                 <small>HTMx, TailwindCSS, Bun (server) &amp; Preact (SSR)</small>
             </div>
-            <div class="md:w-1/2 mx-auto">
+            <div class="md:w-[75%] mx-auto">
                 <div class="bg-white shadow-md rounded-lg p-6">
                     <form id="todo-form" hx-post="/todo" hx-target="#todo-list" hx-swap="afterbegin" hx-on--after-request="this.reset()">
                         <div class="flex mb-4">
@@ -28,7 +28,7 @@ export function TodoList() {
                                     hc-req:disabled
                                     hc-invalid-target="#add-error"
                                     hc-invalid-class="border-red-500 text-red-600"
-                                    hc-invalid-events="blur keyup"
+                                    hc-invalid-events="keyup"
                                     autocomplete="off" name="task" placeholder="New Todo" class="w-full px-4 py-2 mr-2 rounded-lg disabled:opacity-10
                                                     border-blue-300 focus:outline-none
                                                     focus:border-blue-500" id="todo-input"/>

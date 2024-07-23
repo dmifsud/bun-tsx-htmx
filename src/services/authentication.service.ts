@@ -1,7 +1,7 @@
 import { User } from "../models/users.model";
 
 
-const fakeUsersDb: User[] = [
+export const fakeUsersDb: User[] = [
     {
         id: 1,
         email: 'joe@doe.com',
@@ -32,10 +32,10 @@ const fakeUsersDb: User[] = [
     },
     {
         id: 5,
-        email: 'david.wilson@example.com',
+        email: 'david@mifsud.com',
         name: 'David',
-        surname: 'Wilson',
-        dob: '1990-05-24',
+        surname: 'Mifsud',
+        dob: '1989-04-05',
     },
 ];
 

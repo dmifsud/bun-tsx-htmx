@@ -1,12 +1,16 @@
 
 /** @jsx h */
 import { h } from 'preact';
+import { fakeUsersDb } from '../../services/authentication.service';
 interface Values {
     email: string;
     password: string;
 }
 
 const Login = () => {
+
+    const numOfUsers = fakeUsersDb.length;
+    const randomUserIndex = Math.floor(Math.random() * numOfUsers);
 
     return (
         <section class="bg-gray-50 dark:bg-gray-900">
@@ -19,11 +23,10 @@ const Login = () => {
                         <form id="login-form" class="space-y-4 md:space-y-6" hx-post="/login" hx-target="#login-message" hx-swap="innerHTML">
                             <div className='text-left'>
                                 <label htmlFor="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
-                                <input type="email" name="email" placeholder="name@company.com" required hc-invalid-target="#email-error" hc-invalid-class="invalid:border-red-500 invalid:text-red-600" hc-invalid-events="blur"
+                                <input type="email" name="email" placeholder={fakeUsersDb[randomUserIndex].email} required hc-invalid-target="#email-error" hc-invalid-class="invalid:border-red-500 invalid:text-red-600" hc-invalid-events="blur"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     />
                                 <p id="email-error" className='text-red-600 text-sm'></p>
-                                {/* {Boolean(errors.email) && Boolean(touched.email) && <p className='text-red-600 text-sm'>{errors.email}</p>} */}
                             </div>
                             <div className='text-left'>
                                 <label htmlFor="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
@@ -31,7 +34,6 @@ const Login = () => {
                                     class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     />
                                      <p id="password-error" className='text-red-600 text-sm'></p>
-                                    {/* {Boolean(errors.password) && Boolean(touched.password) && <p className='text-red-600 text-sm'>{errors.password}</p>} */}
                             </div>
                             <div class="flex items-center justify-between">
                                 <div class="flex items-start">
@@ -42,22 +44,29 @@ const Login = () => {
                                         <label htmlFor="remember" class="text-gray-500 dark:text-gray-300">Remember me</label>
                                     </div>
                                 </div>
-                                <a href="#" class="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">Forgot password?</a>
+                                <a href="#" class="text-sm font-medium text-primary-600 hover:underline dark:text-white opacity-5" disabled hx-on:click="comingSoon(event, 'Forgot password coming soon!')">Forgot password?</a>
                             </div>
-                            {/* TODO: web component doesn't trigger submit event */}
-                            {/* <LitButtonReact onSubmit={submitForm} type="submit" disabled={!isValid || loading} text={loading ? "Loading..." : "Sign in"} fullWidth/> */}
                             <button type="submit" hc-req:disabled class="disabled:opacity-10 bg-blue-700 w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                                 <span hc-request-loading-hide="#login-form">Sign In</span>
                                 <span hc-request-loading-show="#login-form">Loading&hellip;</span>
                             </button>
                             <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-                                Don’t have an account yet? <a href="#" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up</a>
+                                Don’t have an account yet? <a href="#" class="font-medium text-primary-600 hover:underline dark:text-primary-500 opacity-5" disabled hx-on:click="comingSoon(event, 'Sign up coming soon!')">Sign up</a>
                             </p>
                             <p id="login-message" class="text-red-600 text-sm"></p>
                         </form>
                     </div>
                 </div>
             </div>
+            <script>
+                {
+                // This is less than ideal and wouldn't recommend it in a real-world app
+                `${function comingSoon(event: Event, text: string) {
+                    alert(text);
+                    event.preventDefault();
+                }}`
+                }
+            </script>
         </section>
     );
 };
