@@ -28,7 +28,7 @@ export function renderBase(page: h.JSX.Element, title: string = 'Bun Project') {
                 <title>${title}</title>
                 ${render(frontendLib())}
             </head>
-            <body class="bg-gray-50 dark:bg-gray-900">
+            <body class="bg-gray-50 dark:bg-gray-900" hx-boost="true">
                 ${render(page)}
             </body>
         </html>
