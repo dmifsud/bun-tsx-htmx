@@ -1,12 +1,12 @@
 import htmx from 'htmx.org';
-import invalidTarget from './invalid-target';
+import HyperValidate from 'hyper-validate';
 import requestLoadingShow from './request-loading-show';
 import requestLoadingAttributes from './request-loading-attributes';
-
 const eventsToSync = [
-    invalidTarget, // NOT HTMX DEPENDENT
+    // invalidTarget, // NOT HTMX DEPENDENT
     requestLoadingShow,
     requestLoadingAttributes,
+    HyperValidate.applyToHTML
 ];
 
 if (htmx) {

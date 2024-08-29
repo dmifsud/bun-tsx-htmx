@@ -6,6 +6,7 @@ import {
     setSignedCookie,
     deleteCookie,
   } from 'hono/cookie'
+  import mongoose from 'mongoose';
 import { serveStatic } from 'hono/bun';
 import { TodoList, todos } from './templates/todo/TodoList';
 import { render } from 'preact-render-to-string';
@@ -22,8 +23,16 @@ import { courseData } from './mock_api/course-data.mock.api';
 import ActivityModal from './templates/activities/ActivityModal';
 import AuthBase from './templates/authBase';
 import { CourseActivityItems } from './templates/activities/CourseActivityItem';
+import { OnlineLearningDB } from './db';
+import { ObjectId } from 'mongodb';
+import { User } from './models/users.model';
+
 
 const app = new Hono();
+
+const db = new OnlineLearningDB();
+await db.connect();
+
 
 
 const timeout = (ms: number) => {
@@ -35,8 +44,11 @@ const authMiddleware: MiddlewareHandler = async (c, next) => {
     const userId = getCookie(c, 'userId');
     const rememberMe = getCookie(c, 'rememberMe');
     if (token && userId) {
-        const isAuthenticated = await authService.isAuthenticated(Number(userId), token, rememberMe === 'true');
+        console.log('checking authentication using userId', userId);
+        const isAuthenticated = await authService.isAuthenticated(userId, token, rememberMe === 'true');
         if (isAuthenticated) {
+            const loggedInUser = await authService.getLoggedInUser();
+            c.set('loggedInUser', loggedInUser);
             await next();
         } else {
             return c.redirect('/login');
@@ -66,11 +78,16 @@ app.post('/login', async (c) => {
     try {
         const rememberMe = (remember as string) === 'on';
         const user = await authService.login(email as string, password as string, rememberMe);
-        c.res.headers.append('Set-Cookie', `token=${authService.fakeToken}; HttpOnly; Path=/`);
-        c.res.headers.append('Set-Cookie', `userId=${user.id}; HttpOnly; Path=/`);
-        c.res.headers.append('Set-Cookie', `rememberMe=${rememberMe}; HttpOnly; Path=/`);
-        await timeout(500);
-        return c.html(`<meta http-equiv="refresh" content="0;URL='/'">`);
+        if (user) {
+          c.res.headers.append('Set-Cookie', `token=${authService.fakeToken}; HttpOnly; Path=/`);
+          c.res.headers.append('Set-Cookie', `userId=${user._id.toString()}; HttpOnly; Path=/`);
+          c.res.headers.append('Set-Cookie', `rememberMe=${rememberMe}; HttpOnly; Path=/`);
+        } else {
+          return c.html(`<p>User ${email} not found</p>`);
+        }
+        await timeout(500); // NOTE: for simulation purposes only
+        c.res.headers.append('HX-Redirect', '/');
+        return;
     } catch (err) {
         return c.html(`<p>${err}</p>`);
     }
@@ -80,11 +97,12 @@ app.post('/signout', async (c) => {
     deleteCookie(c, 'token');
     deleteCookie(c, 'userId');
     await timeout(400);
-    return c.html(`<meta http-equiv="refresh" content="0;URL='/'">`);
+    c.res.headers.append('HX-Refresh', 'true');
+    return;
 });
 
-app.get('/activities', authMiddleware, (c) => {
-    return c.html(renderBase(ActivitiesPage(), 'Activities'));
+app.get('/activities', authMiddleware, async (c) => {
+    return c.html(renderBase(await ActivitiesPage(), 'Activities'));
 });
 
 app.get('/activities/courses', authMiddleware, (c) => {
@@ -109,8 +127,9 @@ app.post('/activities/courses/search', authMiddleware, async (c) => {
     return c.html(render(CourseActivityItems({ activities: filteredActivities })));
 });
 
-app.get('/todo', authMiddleware, (c) => {
-    return c.html(renderBase(AuthBase(TodoList(), "/todo"), 'Todo List'));
+app.get('/todo', authMiddleware, async (c) => {
+    // const user = c.get('loggedInUser') as User;
+    return c.html(renderBase(await AuthBase(TodoList(), "/todo"), 'Todo List'));
 });
 // Handler for the /todo/:id route
 app.get('/todo/:id', (c) => {

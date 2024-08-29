@@ -24,6 +24,6 @@ interface ActivitiesModalStore {
     );
   };
   
-  export default () => {
-    return AuthBase(ActivitiesPage(), "/activities");
+  export default async () => {
+    return await AuthBase(ActivitiesPage(), "/activities");
   };
