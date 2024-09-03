@@ -23,7 +23,7 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
                             <input type="text" autocomplete="off" class="w-full px-4 py-2 mr-2 rounded-lg
                                             border-gray-300 focus:outline-none
                                             focus:border-blue-500" 
-                                            required hc-invalid-target={`#update-error-${todo.id}`} hc-invalid-class="border-red-500 text-red-600" hc-invalid-events="blur keyup"
+                                            required hv-invalid-target={`#update-error-${todo.id}`} hv-invalid-class="border-red-500 text-red-600" hv-invalid-events="blur keyup"
                                             value={todo.task} name="task"/> :
                             <span>
                                 <input type="checkbox" name="done" hx-patch={`/todos/${todo.id}`} hx-trigger="change" checked={todo.done} class="mr-2"/>

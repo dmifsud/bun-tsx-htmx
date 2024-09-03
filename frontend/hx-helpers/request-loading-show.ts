@@ -2,7 +2,6 @@ const syncEvents = (content: HTMLElement) => {
 
     content.querySelectorAll('[hc-request-loading-show]').forEach((el: Element) => {
         if ((el as HTMLElement).dataset.listenersAdded === 'true') {
-            console.log('already added');
             return;
         }
         const formSelector = el.getAttribute('hc-request-loading-show');
@@ -24,7 +23,6 @@ const syncEvents = (content: HTMLElement) => {
 
     content.querySelectorAll('[hc-request-loading-hide]').forEach((el: Element) => {
         if ((el as HTMLElement).dataset.listenersAdded === 'true') {
-            console.log('already added');
             return;
         }
         const formSelector = el.getAttribute('hc-request-loading-hide');

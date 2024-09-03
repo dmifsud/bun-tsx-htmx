@@ -33,4 +33,4 @@ const userSchema = new mongoose.Schema<User & { password: string } & UserDocumen
 );
 
 export type UserSchema = mongoose.InferSchemaType<typeof userSchema>;
-export const UserSchemaModel = mongoose.model('User', userSchema);
+export const UserSchemaModel = mongoose.model('users', userSchema);

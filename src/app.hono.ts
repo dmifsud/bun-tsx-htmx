@@ -8,7 +8,7 @@ import {
   } from 'hono/cookie'
   import mongoose from 'mongoose';
 import { serveStatic } from 'hono/bun';
-import { TodoList, todos } from './templates/todo/TodoList';
+import { TodoList } from './templates/todo/TodoList';
 import { render } from 'preact-render-to-string';
 import { TodoItem } from './templates/todo/TodoItem';
 
@@ -26,6 +26,7 @@ import { CourseActivityItems } from './templates/activities/CourseActivityItem';
 import { OnlineLearningDB } from './db';
 import { ObjectId } from 'mongodb';
 import { User } from './models/users.model';
+import { TodoService } from './services/todo.service';
 
 
 const app = new Hono();
@@ -33,6 +34,7 @@ const app = new Hono();
 const db = new OnlineLearningDB();
 await db.connect();
 
+const todoService = new TodoService();
 
 
 const timeout = (ms: number) => {
@@ -61,7 +63,7 @@ const authMiddleware: MiddlewareHandler = async (c, next) => {
 app.use("/dist/*", serveStatic({ root: "./" }));
 
 // Function to find a todo by ID
-const findTodoById = (id: number) => todos.find(todo => todo.id === id);
+// const findTodoById = (id: number) => todos.find(todo => todo.id === id);
 
 app.get('/', authMiddleware, (c) => {
     // TODO: create an actual home page
@@ -78,6 +80,7 @@ app.post('/login', async (c) => {
     try {
         const rememberMe = (remember as string) === 'on';
         const user = await authService.login(email as string, password as string, rememberMe);
+        console.log('user found', user);
         if (user) {
           c.res.headers.append('Set-Cookie', `token=${authService.fakeToken}; HttpOnly; Path=/`);
           c.res.headers.append('Set-Cookie', `userId=${user._id.toString()}; HttpOnly; Path=/`);
@@ -87,7 +90,7 @@ app.post('/login', async (c) => {
         }
         await timeout(500); // NOTE: for simulation purposes only
         c.res.headers.append('HX-Redirect', '/');
-        return;
+        return c.html('');
     } catch (err) {
         return c.html(`<p>${err}</p>`);
     }
@@ -98,7 +101,7 @@ app.post('/signout', async (c) => {
     deleteCookie(c, 'userId');
     await timeout(400);
     c.res.headers.append('HX-Refresh', 'true');
-    return;
+    return c.html('');
 });
 
 app.get('/activities', authMiddleware, async (c) => {
@@ -129,12 +132,13 @@ app.post('/activities/courses/search', authMiddleware, async (c) => {
 
 app.get('/todo', authMiddleware, async (c) => {
     // const user = c.get('loggedInUser') as User;
-    return c.html(renderBase(await AuthBase(TodoList(), "/todo"), 'Todo List'));
+    const todos = await todoService.getAllTodos();
+    return c.html(renderBase(await AuthBase(TodoList(todos), "/todo"), 'Todo List'));
 });
 // Handler for the /todo/:id route
-app.get('/todo/:id', (c) => {
-  const id = +c.req.param('id');
-  const todo = findTodoById(id);
+app.get('/todo/:id', async (c) => {
+  const id = c.req.param('id');
+  const todo = await todoService.getTodoById(id);
   if (todo) {
     return c.html(render(TodoItem({ todo })));
   } else {
@@ -143,9 +147,9 @@ app.get('/todo/:id', (c) => {
 });
 
 // Handler for the /todo/:id/edit route
-app.get('/todo/:id/edit', (c) => {
-  const id = +c.req.param('id');
-  const todo = findTodoById(id);
+app.get('/todo/:id/edit', async (c) => {
+  const id = c.req.param('id');
+  const todo = await todoService.getTodoById(id);
   if (todo) {
     return c.html(render(TodoItem({ todo, edit: true })));
   } else {
@@ -156,23 +160,21 @@ app.get('/todo/:id/edit', (c) => {
 // Function to handle adding a new todo
 app.post('/todo', async (c) => {
     const data = await c.req.parseBody();
-    const newTodo: Todo = {
-      id: Date.now(),
-      task: data.task?.toString() || '',
-      done: false,
-    };
-    todos.push(newTodo);
+    // TODO: add server side validation
+    const newTodo = await todoService.addTodo(data.task?.toString());
     return c.html(render(TodoItem({ todo: newTodo })));
   });
   
   // Function to handle updating a todo
   app.patch('/todos/:id', async (c) => {
-    const id = +c.req.param('id');
-    const todoToUpdate = findTodoById(id);
+    const id = c.req.param('id');
+    const data = await c.req.parseBody();
+    const taskNameUpdated = data.task?.toString();
+    const todoToUpdate = await todoService.patchTodo(id, {
+      task: taskNameUpdated,
+      done: !taskNameUpdated ? data.done === 'on' : undefined
+    });
     if (todoToUpdate) {
-      const data = await c.req.parseBody();
-      todoToUpdate.task = data.task?.toString() ?? todoToUpdate.task;
-      todoToUpdate.done = data.done === 'on';
       await timeout(500);
       return c.html(render(TodoItem({ todo: todoToUpdate })));
     } else {
@@ -181,14 +183,13 @@ app.post('/todo', async (c) => {
   });
   
   // Function to handle deleting a todo
-  app.delete('/todo/:id', (c) => {
-    const id = +c.req.param('id');
-    const todoIndex = todos.findIndex(todo => todo.id === id);
-    if (todoIndex !== -1) {
-      todos.splice(todoIndex, 1);
+  app.delete('/todo/:id', async (c) => {
+    const id = c.req.param('id');
+    try {
+      await todoService.deleteTodo(id);
       // empty response
       return new Response();
-    } else {
+    } catch (ex) {
       return c.text('Not found', 404);
     }
   });
