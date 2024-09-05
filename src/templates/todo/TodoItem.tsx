@@ -12,7 +12,7 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
     return (
         <li class="[&:not(:last-child)]:border-b border-gray-200 hover:bg-slate-50">
             <form id={`item-${todo.id}`} 
-                hx-patch={`/todos/${todo.id}`}
+                hx-patch={`/todo/${todo.id}`}
                 hx-target="closest li"
                 hx-swap="outerHTML" 
                 hc-req:class="animate-loadingAnimation"
@@ -26,7 +26,7 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
                                             required hv-invalid-target={`#update-error-${todo.id}`} hv-invalid-class="border-red-500 text-red-600" hv-invalid-events="blur keyup"
                                             value={todo.task} name="task"/> :
                             <span>
-                                <input type="checkbox" name="done" hx-patch={`/todos/${todo.id}`} hx-trigger="change" checked={todo.done} class="mr-2"/>
+                                <input type="checkbox" name="done" hx-patch={`/todo/${todo.id}`} hx-trigger="change" checked={todo.done} class="mr-2"/>
                                 <span class={classes.taskText}>{todo.task}</span>
                             </span>
                     }

@@ -1,4 +1,4 @@
-import { Hono, MiddlewareHandler } from 'hono';
+import { Hono } from 'hono';
 import {
     getCookie,
     getSignedCookie,
@@ -6,27 +6,21 @@ import {
     setSignedCookie,
     deleteCookie,
   } from 'hono/cookie'
-  import mongoose from 'mongoose';
 import { serveStatic } from 'hono/bun';
-import { TodoList } from './templates/todo/TodoList';
 import { render } from 'preact-render-to-string';
-import { TodoItem } from './templates/todo/TodoItem';
 
 import { Serve } from 'bun';
 import { renderBase } from './templates/base';
-import { Todo } from './models/todo.model';
 import Login from './templates/login/Login.page';
 import ActivitiesPage from './templates/activities/Activities.page';
-import authService, { AuthenticationService } from './services/authentication.service';
+import authService from './services/authentication.service';
 import CourseActivities from './templates/activities/CourseActivities';
 import { courseData } from './mock_api/course-data.mock.api';
 import ActivityModal from './templates/activities/ActivityModal';
-import AuthBase from './templates/authBase';
 import { CourseActivityItems } from './templates/activities/CourseActivityItem';
 import { OnlineLearningDB } from './db';
-import { ObjectId } from 'mongodb';
-import { User } from './models/users.model';
-import { TodoService } from './services/todo.service';
+import { authMiddleware } from './middleware/auth.middleware';
+import todoRoutes from './routes/todo.routes';
 
 
 const app = new Hono();
@@ -34,36 +28,16 @@ const app = new Hono();
 const db = new OnlineLearningDB();
 await db.connect();
 
-const todoService = new TodoService();
+// SET ROUTES
+app.route('/todo', todoRoutes);
 
 
 const timeout = (ms: number) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const authMiddleware: MiddlewareHandler = async (c, next) => {
-    const token = getCookie(c, 'token');
-    const userId = getCookie(c, 'userId');
-    const rememberMe = getCookie(c, 'rememberMe');
-    if (token && userId) {
-        console.log('checking authentication using userId', userId);
-        const isAuthenticated = await authService.isAuthenticated(userId, token, rememberMe === 'true');
-        if (isAuthenticated) {
-            const loggedInUser = await authService.getLoggedInUser();
-            c.set('loggedInUser', loggedInUser);
-            await next();
-        } else {
-            return c.redirect('/login');
-        }
-    } else {
-        return c.redirect('/login');
-    }
-};
-
 app.use("/dist/*", serveStatic({ root: "./" }));
 
-// Function to find a todo by ID
-// const findTodoById = (id: number) => todos.find(todo => todo.id === id);
 
 app.get('/', authMiddleware, (c) => {
     // TODO: create an actual home page
@@ -130,69 +104,6 @@ app.post('/activities/courses/search', authMiddleware, async (c) => {
     return c.html(render(CourseActivityItems({ activities: filteredActivities })));
 });
 
-app.get('/todo', authMiddleware, async (c) => {
-    // const user = c.get('loggedInUser') as User;
-    const todos = await todoService.getAllTodos();
-    return c.html(renderBase(await AuthBase(TodoList(todos), "/todo"), 'Todo List'));
-});
-// Handler for the /todo/:id route
-app.get('/todo/:id', async (c) => {
-  const id = c.req.param('id');
-  const todo = await todoService.getTodoById(id);
-  if (todo) {
-    return c.html(render(TodoItem({ todo })));
-  } else {
-    return c.text('Not found', 404);
-  }
-});
-
-// Handler for the /todo/:id/edit route
-app.get('/todo/:id/edit', async (c) => {
-  const id = c.req.param('id');
-  const todo = await todoService.getTodoById(id);
-  if (todo) {
-    return c.html(render(TodoItem({ todo, edit: true })));
-  } else {
-    return c.text('Not found', 404);
-  }
-});
-
-// Function to handle adding a new todo
-app.post('/todo', async (c) => {
-    const data = await c.req.parseBody();
-    // TODO: add server side validation
-    const newTodo = await todoService.addTodo(data.task?.toString());
-    return c.html(render(TodoItem({ todo: newTodo })));
-  });
-  
-  // Function to handle updating a todo
-  app.patch('/todos/:id', async (c) => {
-    const id = c.req.param('id');
-    const data = await c.req.parseBody();
-    const taskNameUpdated = data.task?.toString();
-    const todoToUpdate = await todoService.patchTodo(id, {
-      task: taskNameUpdated,
-      done: !taskNameUpdated ? data.done === 'on' : undefined
-    });
-    if (todoToUpdate) {
-      await timeout(500);
-      return c.html(render(TodoItem({ todo: todoToUpdate })));
-    } else {
-      return c.text('Not found', 404);
-    }
-  });
-  
-  // Function to handle deleting a todo
-  app.delete('/todo/:id', async (c) => {
-    const id = c.req.param('id');
-    try {
-      await todoService.deleteTodo(id);
-      // empty response
-      return new Response();
-    } catch (ex) {
-      return c.text('Not found', 404);
-    }
-  });
 
 const bunServeConfig: Serve = {
     port: process.env.PORT || 8080, 
