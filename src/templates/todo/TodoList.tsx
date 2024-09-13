@@ -19,9 +19,9 @@ export function TodoList(todos: Todo[]) {
                 <small>HTMx, TailwindCSS, Bun (server) &amp; Preact (SSR), MongoDB (Mongoose)</small>
             </div>
             <div class="md:w-[75%] mx-auto">
-                <div class="bg-white shadow-md rounded-lg p-6">
+                <div class="bg-white shadow-md rounded-lg p-6 w-auto border border-gray-200 sm:p-8 dark:bg-gray-800 dark:border-gray-700">
                     <form id="todo-form" hx-post="/todo" hx-target="#todo-list" hx-swap="afterbegin" hx-on--after-request="this.reset()">
-                        <div class="flex mb-4">
+                        <div class="flex mb-4 gap-4">
                             <input type="text" 
                                     required
                                     pattern="^[a-zA-Z0-9 ]{1,}$"
@@ -29,9 +29,7 @@ export function TodoList(todos: Todo[]) {
                                     hv-invalid-target="#add-error"
                                     hv-invalid-class="border-red-500 text-red-600"
                                     hv-invalid-events="keyup"
-                                    autocomplete="off" name="task" placeholder="New Todo" class="w-full px-4 py-2 mr-2 rounded-lg disabled:opacity-10
-                                                    border-blue-300 focus:outline-none
-                                                    focus:border-blue-500" id="todo-input"/>
+                                    autocomplete="off" name="task" placeholder="New Todo" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="todo-input"/>
                             <button type="submit" hc-req:disabled class="bg-blue-500 hover:bg-blue-700 
                                                     text-white font-bold py-2 px-4 rounded disabled:opacity-10">
                                 <span hc-request-loading-hide="#todo-form">Add</span>

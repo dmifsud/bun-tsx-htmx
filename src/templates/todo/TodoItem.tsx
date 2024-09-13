@@ -10,7 +10,7 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
     };
     
     return (
-        <li class="[&:not(:last-child)]:border-b border-gray-200 hover:bg-slate-50">
+        <li class="[&:not(:last-child)]:border-b border-gray-200 hover:bg-slate-50 dark:hover:bg-gray-700">
             <form id={`item-${todo.id}`} 
                 hx-patch={`/todo/${todo.id}`}
                 hx-target="closest li"
@@ -27,7 +27,7 @@ export function TodoItem(props: { todo: Todo, edit?: boolean }) {
                                             value={todo.task} name="task"/> :
                             <span>
                                 <input type="checkbox" name="done" hx-patch={`/todo/${todo.id}`} hx-trigger="change" checked={todo.done} class="mr-2"/>
-                                <span class={classes.taskText}>{todo.task}</span>
+                                <span class={`${classes.taskText} dark:text-white`}>{todo.task}</span>
                             </span>
                     }
                 </label>
